@@ -55,7 +55,9 @@ class Test0 < ActiveRecord::Illusion
   #belongs_to :user, :foreign_key => :name
 
   view do
-    select{ users.name }.from("users")
+    User.joins{exhibits}.select{
+      [users.name.as(name), exhibits.name.as(xname) ]
+    }
   end
 end
 
