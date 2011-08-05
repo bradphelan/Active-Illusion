@@ -71,9 +71,9 @@ module ActiveRecord
     def self.view
       meta = class << self;self;end
       m = yield
+      table = self.to_s.underscore.pluralize
       meta.send :define_method, :default_scope do
-        table = self.to_s.underscore.pluralize
-        q = m.build_arel.as table
+        q = m.arel.as table
         select{}.from(q)
       end
     end
