@@ -21,7 +21,7 @@ module ActiveRecord
   #
   #   belongs_to :award
   #
-  #   def self.find_all
+  #   view
   #     select{[awards.type.as(award_type), awards.id.as(award_id)]}.from("awards")
   #   end
   # end
@@ -70,9 +70,10 @@ module ActiveRecord
 
     def self.view
       meta = class << self;self;end
+      m = yield
       meta.send :define_method, :default_scope do
         table = self.to_s.underscore.pluralize
-        q = yield.build_arel.as table
+        q = m.build_arel.as table
         select{}.from(q)
       end
     end
