@@ -24,6 +24,7 @@ class Exhibit < ActiveRecord::Base
         t.belongs_to :user
         t.string :name
         t.text :notes
+        t.integer :ssn
         t.timestamps
     end
 
@@ -52,11 +53,12 @@ end
 class Test0 < ActiveRecord::Illusion
   column :name
   column :exhibition
+  column :number
   #belongs_to :user, :foreign_key => :name
 
   view do
     User.joins{exhibits}.select{
-      [users.name.as(name), exhibits.name.as(xname) ]
+      [users.name.as(name), exhibits.name.as(xname), exhibits.ssn.as(number) ]
     }
   end
 end
@@ -79,7 +81,7 @@ describe ActiveRecord::Illusion do
         Exhibit.destroy_all
 
         puts 'Inserting 100 users and exhibits...'
-        100.times do
+        100.times do |i|
             user = User.create(
                 :created_at => today,
                 :name       => ActiveRecord::Faker.name,
@@ -90,7 +92,8 @@ describe ActiveRecord::Illusion do
                 :created_at => today,
                 :name       => ActiveRecord::Faker.name,
                 :user       => user,
-                :notes      => notes
+                :notes      => notes,
+                :ssn        => i
             )
         end
 
@@ -106,8 +109,14 @@ describe ActiveRecord::Illusion do
 
     describe Test0 do
         it "should retrieve 100 rows" do
-            puts Test0.where{}.to_sql
+            Test0.where{}.to_sql.should ==
+            %Q[SELECT \"test0s\".* FROM (SELECT \"users\".\"name\" AS name, \"exhibits\".\"name\" AS xname, \"exhibits\".\"ssn\" AS number FROM \"users\" INNER JOIN \"exhibits\" ON \"exhibits\".\"user_id\" = \"users\".\"id\") test0s ]
             Test0.count.should == 100
+
+
+            Test0.where{number < 20}.to_sql.should ==
+              %Q[SELECT "test0s".* FROM (SELECT "users"."name" AS name, "exhibits"."name" AS xname, "exhibits"."ssn" AS number FROM "users" INNER JOIN "exhibits" ON "exhibits"."user_id" = "users"."id") test0s  WHERE "test0s"."number" < 20]
+            Test0.where{number < 20}.count.should == 20
         end
     end
 end
