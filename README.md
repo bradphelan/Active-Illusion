@@ -13,7 +13,7 @@ For example
 
      belongs_to :award
 
-     view
+     view do
        Award.select{
            [awards.type.as(award_type), awards.id.as(award_id)]
        }
@@ -45,3 +45,5 @@ b.award_type_views
        WHERE "award_type_views"."award_id" = 1
 
 Currently this gem depends on the SQUEEL SQL gem
+
+For a more detailed example see: http://stackoverflow.com/questions/6900508/how-to-create-read-only-models-in-rails-with-no-backing-table
